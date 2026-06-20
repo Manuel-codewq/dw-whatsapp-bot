@@ -8,26 +8,70 @@ const INSTANCE       = process.env.EVOLUTION_INSTANCE || "DynamicWorks";
 const ANTHROPIC_KEY  = process.env.ANTHROPIC_API_KEY;
 const GROUP_LINK     = "https://chat.whatsapp.com/KpoqJd7os526c59DQ8eRXe";
 
-const MENU = `👋 Olá! Bem-vindo ao suporte da *Dynamic Works* 📈
+const MENU = `Olá! Bem-vindo ao suporte da Dynamic Works 📈
 
 Escolhe uma opção:
 
-1️⃣ Como criar conta?
-2️⃣ Como depositar?
-3️⃣ Como negociar?
-4️⃣ Bónus e promoções
-5️⃣ Grupo de aulas gratuitas
-6️⃣ Falar com suporte humano
+1 - Como criar conta?
+2 - Como depositar?
+3 - Como negociar?
+4 - Bónus e promoções
+5 - Grupo de aulas gratuitas
+6 - Falar com suporte humano
 
-_Responde com o número da opção ou faz a tua pergunta directamente._`;
+Responde com o número da opção ou faz a tua pergunta directamente.`;
 
 const RESPOSTAS = {
-  "1": `📝 *Como criar conta na Dynamic Works:*\n\n1. Acede a https://dynamicworks.ao/register\n2. Insere o teu NIF (Bilhete de Identidade)\n3. Preenche o email e senha\n4. Confirma o email\n5. Pronto! Tens 10.000 AOA de bónus demo 🎉`,
-  "2": `💰 *Como depositar:*\n\n1. Acede a https://dynamicworks.ao/wallet\n2. Clica em "Depositar"\n3. Escolhe o valor em Kwanzas (mínimo 5.000 Kz)\n4. Selecciona o método de pagamento\n5. Confirma com o código OTP enviado ao teu email\n6. O admin aprova o depósito manualmente\n\n_Guarda sempre o comprovativo! Suporte: +244 921 825 299_`,
-  "3": `📊 *Como negociar:*\n\n1. Escolhe um par (EUR/USD, BTC/USD...)\n2. Analisa o gráfico\n3. Define o valor da aposta\n4. Clica ⬆️ SUBIR ou ⬇️ DESCER\n5. Aguarda o resultado em 30s a 5min\n\n💡 Começa no modo *Demo* para praticar!\n\n${GROUP_LINK}`,
-  "4": `🎁 *Bónus e promoções:*\n\n✅ 10.000 AOA demo ao registar\n✅ Bónus por cada amigo referido\n✅ Promoções especiais para traders activos\n\n_Acede à plataforma para ver promoções actuais!_`,
-  "5": `📚 *Grupo de aulas gratuitas:*\n\nJunta-te ao grupo onde partilhamos estratégias e análises todos os dias!\n\n👇\n${GROUP_LINK}\n\n_É gratuito e aberto a todos!_ 🚀`,
-  "6": `👨‍💼 *Suporte humano:*\n\n📞 WhatsApp: *+244 921 825 299*\n🌐 https://dynamicworks.ao\n\n_Horário: Segunda a Sexta, 08h-18h_`,
+  "1": `Para criar conta na Dynamic Works é simples:
+
+1. Acede a https://dynamicworks.ao/register
+2. Insere o teu NIF (Bilhete de Identidade)
+3. Preenche o email e a senha
+4. Confirma o email
+5. Pronto! Recebes 10.000 Kz de bónus demo para praticar 🎉`,
+
+  "2": `Para fazer um depósito:
+
+1. Acede a https://dynamicworks.ao/wallet
+2. Clica em Depositar
+3. Escolhe o valor em Kwanzas (mínimo 5.000 Kz)
+4. Selecciona o método de pagamento
+5. Confirma com o código OTP enviado ao teu email
+6. O admin aprova o depósito manualmente
+
+Guarda sempre o comprovativo de pagamento. Qualquer dúvida contacta o suporte: +244 921 825 299`,
+
+  "3": `Para negociar na plataforma:
+
+1. Escolhe um par de moedas (EUR/USD, BTC/USD, etc.)
+2. Analisa o gráfico
+3. Define o valor da aposta
+4. Clica em SUBIR ou DESCER
+5. Aguarda o resultado (entre 30 segundos e 5 minutos)
+
+Dica: começa no modo Demo para praticar sem risco antes de usar dinheiro real.
+
+Entra no nosso grupo de aulas para aprender mais: ${GROUP_LINK}`,
+
+  "4": `Bónus e promoções disponíveis:
+
+- 10.000 Kz de bónus demo ao criar conta
+- Bónus por cada amigo que convidares
+- Promoções especiais para traders activos
+
+Acede à plataforma para ver as promoções actuais: https://dynamicworks.ao`,
+
+  "5": `Temos um grupo gratuito no WhatsApp onde partilhamos estratégias, análises e dicas de trading todos os dias.
+
+Entra aqui: ${GROUP_LINK}
+
+É completamente gratuito e aberto a todos!`,
+
+  "6": `Podes falar com a nossa equipa de suporte através do WhatsApp: +244 921 825 299
+
+Horário de atendimento: Segunda a Sexta, das 08h às 18h.
+
+Também podes visitar o site: https://dynamicworks.ao`,
 };
 
 const SAUDACAO = /^(ol[aá]|oi|bom dia|boa tarde|boa noite|menu|ajuda|help|start|hello|hi)\b/i;
@@ -45,7 +89,7 @@ async function enviarMensagem(para, texto) {
 }
 
 async function respostaIA(mensagem, nome) {
-  if (!ANTHROPIC_KEY) return "Não consigo responder agora. Contacta o suporte: +244 921 825 299";
+  if (!ANTHROPIC_KEY) return "Nao consigo responder agora. Contacta o suporte: +244 921 825 299";
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -57,41 +101,42 @@ async function respostaIA(mensagem, nome) {
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
         max_tokens: 300,
-        system: `És o assistente virtual da Dynamic Works, plataforma angolana de trading de opções binárias.
+        system: `Es o assistente de suporte da Dynamic Works, plataforma angolana de trading de opcoes binarias.
 
 O QUE A DYNAMIC WORKS OFERECE:
-- Trading de opções binárias (SUBIR ou DESCER)
-- Pares disponíveis: Forex (EUR/USD, GBP/USD, USD/JPY, etc.), Criptomoedas (BTC/USD, ETH/USD), Metais (Prata, Platina, Paládio) e Índices Sintéticos OTC disponíveis 24/7
-- Conta demo gratuita com 10.000 Kz para praticar sem risco
-- Depósitos em Kwanzas (Kz), mínimo 5.000 Kz
-- Levantamentos mínimo 10.000 Kz, processamento em 1 a 3 dias úteis
-- Payout (lucro) até 85% por operação ganha
-- Tempos de expiração: 30 segundos a 5 minutos
-- Depósitos aprovados manualmente pelo admin
-- KYC obrigatório para levantamentos
+- Trading de opcoes binarias (SUBIR ou DESCER)
+- Pares: Forex (EUR/USD, GBP/USD, USD/JPY, etc.), Criptomoedas (BTC/USD, ETH/USD), Metais (Prata, Platina, Paladio) e Indices Sinteticos OTC disponiveis 24/7
+- Conta demo com 10.000 Kz para praticar sem risco
+- Depositos em Kwanzas, minimo 5.000 Kz
+- Levantamentos minimo 10.000 Kz, processamento em 1 a 3 dias uteis
+- Payout ate 85% por operacao ganha
+- Tempos de expiracao: 30 segundos a 5 minutos
+- Depositos aprovados manualmente pelo admin
+- KYC obrigatorio para levantamentos
 - Website: https://dynamicworks.ao
-- Grupo de aulas gratuitas: ${GROUP_LINK}
+- Grupo de aulas: ${GROUP_LINK}
 - Suporte: +244 921 825 299
-- Desenvolvida pela Digikap Lda
 
-O QUE NÃO OFERECE (não inventes):
-- Não tem aplicação móvel (só website)
-- Não oferece alavancagem, forex tradicional, acções ou futuros
-- Não tem saques instantâneos (processamento manual)
+O QUE NAO OFERECE:
+- Nao tem aplicacao movel
+- Nao oferece alavancagem, forex tradicional, accoes ou futuros
+- Nao tem saques instantaneos
 
-REGRAS:
-- Responde SEMPRE em português de Angola
-- Sê curto e directo (máximo 3-4 frases)
-- Se não souberes algo com certeza, diz "Não tenho essa informação, contacta o suporte: +244 921 825 299"
-- NUNCA inventes funcionalidades ou serviços que não estão listados acima`,
+REGRAS IMPORTANTES:
+- Responde em portugues de Angola de forma natural e humana
+- Nao uses asteriscos, negrito, italico nem qualquer formatacao markdown
+- Nao uses listas com traco ou ponto quando podes escrever em texto corrido
+- Fala como uma pessoa real, de forma curta e directa (maximo 3-4 frases)
+- Se nao souberes, diz: Nao tenho essa informacao. Podes contactar o suporte pelo +244 921 825 299
+- NUNCA inventes funcionalidades`,
         messages: [{ role: "user", content: nome ? `[${nome}]: ${mensagem}` : mensagem }],
       }),
     });
     const data = await res.json();
-    return data?.content?.[0]?.text || "Não entendi. Escreve *menu* para ver as opções.";
+    return data?.content?.[0]?.text || "Nao entendi. Escreve menu para ver as opcoes.";
   } catch (e) {
     console.error("[Bot] Erro IA:", e.message);
-    return "Ocorreu um erro. Escreve *menu* para ver as opções ou contacta +244 921 825 299";
+    return "Ocorreu um erro. Escreve menu para ver as opcoes ou contacta +244 921 825 299";
   }
 }
 
