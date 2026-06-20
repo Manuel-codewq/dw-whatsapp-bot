@@ -75,6 +75,7 @@ Também podes visitar o site: https://dynamicworks.ao`,
 };
 
 const SAUDACAO = /^(ol[aá]|oi|bom dia|boa tarde|boa noite|menu|ajuda|help|start|hello|hi)\b/i;
+const GRUPO_AULAS = "120363427340812730@g.us";
 
 async function enviarMensagem(para, texto) {
   try {
@@ -150,9 +151,35 @@ async function processarMensagem(de, texto, nome) {
 
 app.get("/", (_, res) => res.json({ ok: true, service: "DynamicWorks WhatsApp Bot" }));
 
+async function boasVindasGrupo(participantes) {
+  for (const jid of participantes) {
+    const numero = jid.replace("@s.whatsapp.net", "").replace("@lid", "");
+    const msg = `Bem-vindo ao grupo de aulas da Dynamic Works! 🎉
+
+Aqui vais aprender a negociar opções binárias de forma segura e rentável.
+
+Para começar, cria a tua conta gratuita em https://dynamicworks.ao e recebes 10.000 Kz de bónus demo para praticar.
+
+Qualquer dúvida podes falar connosco em privado ou aqui no grupo. Boas-vindas!`;
+    await enviarMensagem(numero, msg);
+  }
+}
+
 app.post("/webhook", (req, res) => {
   res.json({ ok: true });
   const { event, data } = req.body || {};
+
+  // Boas-vindas quando alguém entra no grupo de aulas
+  if (event === "groups.participants.upsert" || event === "GROUP_PARTICIPANTS_UPDATE") {
+    const grupoId = data?.id || data?.groupJid || "";
+    const action  = data?.action || "";
+    const participantes = data?.participants || [];
+    if (grupoId === GRUPO_AULAS && action === "add" && participantes.length > 0) {
+      boasVindasGrupo(participantes).catch(console.error);
+    }
+    return;
+  }
+
   if (event !== "messages.upsert") return;
   if (data?.key?.fromMe) return;
   const jid = data?.key?.remoteJid || "";
