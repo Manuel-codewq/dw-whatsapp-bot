@@ -23,7 +23,7 @@ _Responde com o número da opção ou faz a tua pergunta directamente._`;
 
 const RESPOSTAS = {
   "1": `📝 *Como criar conta na Dynamic Works:*\n\n1. Acede a https://dynamicworks.ao/register\n2. Insere o teu NIF (Bilhete de Identidade)\n3. Preenche o email e senha\n4. Confirma o email\n5. Pronto! Tens 10.000 AOA de bónus demo 🎉`,
-  "2": `💰 *Como depositar:*\n\nAceitamos *USDT (TRC20)*:\n1. Na plataforma clica em "Depositar"\n2. Copia o endereço da carteira\n3. Envia USDT (mínimo $5)\n4. O saldo é creditado automaticamente\n\n_Suporte: +244 921 825 299_`,
+  "2": `💰 *Como depositar:*\n\n1. Acede a https://dynamicworks.ao/wallet\n2. Clica em "Depositar"\n3. Escolhe o valor em Kwanzas (mínimo 5.000 Kz)\n4. Selecciona o método de pagamento\n5. Confirma com o código OTP enviado ao teu email\n6. O admin aprova o depósito manualmente\n\n_Guarda sempre o comprovativo! Suporte: +244 921 825 299_`,
   "3": `📊 *Como negociar:*\n\n1. Escolhe um par (EUR/USD, BTC/USD...)\n2. Analisa o gráfico\n3. Define o valor da aposta\n4. Clica ⬆️ SUBIR ou ⬇️ DESCER\n5. Aguarda o resultado em 30s a 5min\n\n💡 Começa no modo *Demo* para praticar!\n\n${GROUP_LINK}`,
   "4": `🎁 *Bónus e promoções:*\n\n✅ 10.000 AOA demo ao registar\n✅ Bónus por cada amigo referido\n✅ Promoções especiais para traders activos\n\n_Acede à plataforma para ver promoções actuais!_`,
   "5": `📚 *Grupo de aulas gratuitas:*\n\nJunta-te ao grupo onde partilhamos estratégias e análises todos os dias!\n\n👇\n${GROUP_LINK}\n\n_É gratuito e aberto a todos!_ 🚀`,
@@ -62,17 +62,19 @@ async function respostaIA(mensagem, nome) {
 O QUE A DYNAMIC WORKS OFERECE:
 - Trading de opções binárias (SUBIR ou DESCER)
 - Pares disponíveis: Forex (EUR/USD, GBP/USD, USD/JPY, etc.), Criptomoedas (BTC/USD, ETH/USD), Metais (Prata, Platina, Paládio) e Índices Sintéticos OTC disponíveis 24/7
-- Conta demo gratuita com 10.000 AOA para praticar sem risco
-- Depósitos apenas em USDT (TRC20), mínimo $5
+- Conta demo gratuita com 10.000 Kz para praticar sem risco
+- Depósitos em Kwanzas (Kz), mínimo 5.000 Kz
+- Levantamentos mínimo 10.000 Kz, processamento em 1 a 3 dias úteis
 - Payout (lucro) até 85% por operação ganha
 - Tempos de expiração: 30 segundos a 5 minutos
+- Depósitos aprovados manualmente pelo admin
+- KYC obrigatório para levantamentos
 - Website: https://dynamicworks.ao
 - Grupo de aulas gratuitas: ${GROUP_LINK}
 - Suporte: +244 921 825 299
 - Desenvolvida pela Digikap Lda
 
 O QUE NÃO OFERECE (não inventes):
-- Não aceita depósitos em kwanzas, transferência bancária, M-Pesa ou outros métodos além de USDT
 - Não tem aplicação móvel (só website)
 - Não oferece alavancagem, forex tradicional, acções ou futuros
 - Não tem saques instantâneos (processamento manual)
