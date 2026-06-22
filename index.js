@@ -77,16 +77,45 @@ Também podes visitar o site: https://dynamicworks.ao`,
 const SAUDACAO = /^(ol[aá]|oi|bom dia|boa tarde|boa noite|menu|ajuda|help|start|hello|hi)\b/i;
 const GRUPO_AULAS = "120363427340812730@g.us";
 
+// --- Protecção anti-spam ---
+
+// IDs de mensagens já processadas (evita duplicados da Evolution API)
+const mensagensProcessadas = new Set();
+setInterval(() => mensagensProcessadas.clear(), 10 * 60 * 1000);
+
+// Cooldown por utilizador: só responde 1 vez por minuto
+const cooldownUtilizadores = new Map();
+const COOLDOWN_MS = 60 * 1000;
+
+function emCooldown(numero) {
+  const ultimo = cooldownUtilizadores.get(numero);
+  return ultimo ? Date.now() - ultimo < COOLDOWN_MS : false;
+}
+
+function marcarCooldown(numero) {
+  cooldownUtilizadores.set(numero, Date.now());
+  setTimeout(() => cooldownUtilizadores.delete(numero), COOLDOWN_MS);
+}
+
+// Fila global: mínimo 4 segundos entre mensagens enviadas
+let filaEnvio = Promise.resolve();
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
 async function enviarMensagem(para, texto) {
-  try {
-    await fetch(`${EVOLUTION_URL}/message/sendText/${INSTANCE}`, {
-      method: "POST",
-      headers: { "apikey": EVOLUTION_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ number: para, text: texto }),
-    });
-  } catch (e) {
-    console.error("[Bot] Erro ao enviar:", e.message);
-  }
+  filaEnvio = filaEnvio.then(async () => {
+    try {
+      await fetch(`${EVOLUTION_URL}/message/sendText/${INSTANCE}`, {
+        method: "POST",
+        headers: { "apikey": EVOLUTION_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({ number: para, text: texto }),
+      });
+      console.log(`[Bot] Enviado para ${para}`);
+    } catch (e) {
+      console.error("[Bot] Erro ao enviar:", e.message);
+    }
+    await delay(4000);
+  });
+  return filaEnvio;
 }
 
 async function respostaIA(mensagem, nome) {
@@ -142,6 +171,11 @@ REGRAS IMPORTANTES:
 }
 
 async function processarMensagem(de, texto, nome) {
+  if (emCooldown(de)) {
+    console.log(`[Bot] Cooldown activo para ${de} — ignorado`);
+    return;
+  }
+  marcarCooldown(de);
   const t = texto.trim();
   if (SAUDACAO.test(t)) return enviarMensagem(de, MENU);
   if (RESPOSTAS[t])     return enviarMensagem(de, RESPOSTAS[t]);
@@ -182,6 +216,17 @@ app.post("/webhook", (req, res) => {
 
   if (event !== "messages.upsert") return;
   if (data?.key?.fromMe) return;
+
+  // Deduplicação: ignorar se já processámos este ID
+  const msgId = data?.key?.id;
+  if (msgId) {
+    if (mensagensProcessadas.has(msgId)) {
+      console.log(`[Bot] Duplicado ignorado: ${msgId}`);
+      return;
+    }
+    mensagensProcessadas.add(msgId);
+  }
+
   const jid = data?.key?.remoteJid || "";
   if (jid.endsWith("@g.us")) return;
   const de   = jid.replace("@s.whatsapp.net", "");
