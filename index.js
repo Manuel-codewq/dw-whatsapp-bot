@@ -219,10 +219,13 @@ app.post("/webhook", (req, res) => {
   const evNorm = (event || "").toLowerCase().replace(/_/g, ".");
   if (evNorm !== "messages.upsert") return;
 
-  console.log("[Bot] Webhook recebido:", JSON.stringify({ event, keys: Object.keys(data || {}) }));
+  console.log("[Bot] Webhook recebido:", JSON.stringify({ event, dataType: Array.isArray(data) ? "array" : typeof data, dataKeys: Array.isArray(data) ? data.length : Object.keys(data || {}) }));
 
-  // Evolution API v2 envia data.messages[] (array); v1 enviava directamente em data
-  const msgs = Array.isArray(data?.messages) ? data.messages : [data];
+  // Evolution API v2.3.7: data pode ser array directo, ou objecto com .messages[], ou objecto simples
+  let msgs;
+  if (Array.isArray(data))            msgs = data;
+  else if (Array.isArray(data?.messages)) msgs = data.messages;
+  else                                msgs = [data];
 
   for (const msg of msgs) {
     if (!msg || msg?.key?.fromMe) continue;
