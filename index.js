@@ -203,8 +203,9 @@ app.post("/webhook", (req, res) => {
   res.json({ ok: true });
   const { event, data } = req.body || {};
 
-  // Boas-vindas quando alguém entra no grupo de aulas
-  if (event === "groups.participants.upsert" || event === "GROUP_PARTICIPANTS_UPDATE") {
+  // Boas-vindas quando alguém entra no grupo de aulas (suporta ambos os formatos)
+  const evUp = (event || "").toUpperCase().replace(/\./g, "_");
+  if (evUp === "GROUPS_PARTICIPANTS_UPSERT" || evUp === "GROUP_PARTICIPANTS_UPDATE") {
     const grupoId = data?.id || data?.groupJid || "";
     const action  = data?.action || "";
     const participantes = data?.participants || [];
@@ -214,25 +215,35 @@ app.post("/webhook", (req, res) => {
     return;
   }
 
-  if (event !== "messages.upsert") return;
-  if (data?.key?.fromMe) return;
+  // Suporta evento em lowercase (messages.upsert) e uppercase (MESSAGES_UPSERT)
+  const evNorm = (event || "").toLowerCase().replace(/_/g, ".");
+  if (evNorm !== "messages.upsert") return;
 
-  // Deduplicação: ignorar se já processámos este ID
-  const msgId = data?.key?.id;
-  if (msgId) {
-    if (mensagensProcessadas.has(msgId)) {
-      console.log(`[Bot] Duplicado ignorado: ${msgId}`);
-      return;
+  console.log("[Bot] Webhook recebido:", JSON.stringify({ event, keys: Object.keys(data || {}) }));
+
+  // Evolution API v2 envia data.messages[] (array); v1 enviava directamente em data
+  const msgs = Array.isArray(data?.messages) ? data.messages : [data];
+
+  for (const msg of msgs) {
+    if (!msg || msg?.key?.fromMe) continue;
+
+    const msgId = msg?.key?.id;
+    if (msgId) {
+      if (mensagensProcessadas.has(msgId)) {
+        console.log(`[Bot] Duplicado ignorado: ${msgId}`);
+        continue;
+      }
+      mensagensProcessadas.add(msgId);
     }
-    mensagensProcessadas.add(msgId);
-  }
 
-  const jid = data?.key?.remoteJid || "";
-  if (jid.endsWith("@g.us")) return;
-  const de   = jid.replace("@s.whatsapp.net", "");
-  const text = data?.message?.conversation || data?.message?.extendedTextMessage?.text || "";
-  if (!de || !text.trim()) return;
-  processarMensagem(de, text, data?.pushName).catch(console.error);
+    const jid = msg?.key?.remoteJid || "";
+    if (jid.endsWith("@g.us")) continue;
+    const de   = jid.replace("@s.whatsapp.net", "");
+    const text = msg?.message?.conversation || msg?.message?.extendedTextMessage?.text || "";
+    console.log(`[Bot] Mensagem de ${de}: "${text}"`);
+    if (!de || !text.trim()) continue;
+    processarMensagem(de, text, msg?.pushName).catch(console.error);
+  }
 });
 
 const PORT = process.env.PORT || 3001;
