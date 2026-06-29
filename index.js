@@ -110,9 +110,9 @@ function calcularTypingDelay(texto) {
   return Math.min(base + texto.length * porChar, max) + jitter;
 }
 
-// Pausa aleatória entre mensagens (2.5 a 6 segundos — evita padrão fixo)
+// Pausa aleatória entre mensagens (5 a 18 segundos — simula humano ocupado)
 function pausaEntreMensagens() {
-  return 2500 + Math.floor(Math.random() * 3500);
+  return 5000 + Math.floor(Math.random() * 13000);
 }
 
 async function enviarMensagem(para, texto) {
@@ -193,8 +193,8 @@ async function processarMensagem(de, texto, nome) {
   }
   marcarCooldown(de);
 
-  // Pausa de "leitura" antes de responder (800-2000ms) — comportamento humano
-  await delay(800 + Math.floor(Math.random() * 1200));
+  // Pausa de "leitura" antes de responder (20-55 segundos) — comportamento humano
+  await delay(20000 + Math.floor(Math.random() * 35000));
 
   const t = texto.trim();
   if (SAUDACAO.test(t)) return enviarMensagem(de, MENU);
