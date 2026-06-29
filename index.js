@@ -97,23 +97,39 @@ function marcarCooldown(numero) {
   setTimeout(() => cooldownUtilizadores.delete(numero), COOLDOWN_MS);
 }
 
-// Fila global: mínimo 4 segundos entre mensagens enviadas
+// Fila global para não enviar várias mensagens em simultâneo
 let filaEnvio = Promise.resolve();
 const delay = ms => new Promise(r => setTimeout(r, ms));
+
+// Tempo de "digitação" realista consoante o tamanho do texto
+function calcularTypingDelay(texto) {
+  const base   = 1200;
+  const porChar = 18; // ~18ms por caractere (simula digitação humana)
+  const max    = 4000;
+  const jitter = Math.floor(Math.random() * 1000); // variação aleatória
+  return Math.min(base + texto.length * porChar, max) + jitter;
+}
+
+// Pausa aleatória entre mensagens (2.5 a 6 segundos — evita padrão fixo)
+function pausaEntreMensagens() {
+  return 2500 + Math.floor(Math.random() * 3500);
+}
 
 async function enviarMensagem(para, texto) {
   filaEnvio = filaEnvio.then(async () => {
     try {
+      const typingMs = calcularTypingDelay(texto);
       await fetch(`${EVOLUTION_URL}/message/sendText/${INSTANCE}`, {
         method: "POST",
         headers: { "apikey": EVOLUTION_KEY, "Content-Type": "application/json" },
-        body: JSON.stringify({ number: para, text: texto }),
+        // delay activa o indicador "a escrever..." antes de enviar
+        body: JSON.stringify({ number: para, text: texto, delay: typingMs }),
       });
-      console.log(`[Bot] Enviado para ${para}`);
+      console.log(`[Bot] Enviado para ${para} (typing ${typingMs}ms)`);
     } catch (e) {
       console.error("[Bot] Erro ao enviar:", e.message);
     }
-    await delay(4000);
+    await delay(pausaEntreMensagens());
   });
   return filaEnvio;
 }
@@ -176,6 +192,10 @@ async function processarMensagem(de, texto, nome) {
     return;
   }
   marcarCooldown(de);
+
+  // Pausa de "leitura" antes de responder (800-2000ms) — comportamento humano
+  await delay(800 + Math.floor(Math.random() * 1200));
+
   const t = texto.trim();
   if (SAUDACAO.test(t)) return enviarMensagem(de, MENU);
   if (RESPOSTAS[t])     return enviarMensagem(de, RESPOSTAS[t]);
