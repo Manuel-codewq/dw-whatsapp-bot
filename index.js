@@ -110,9 +110,9 @@ function calcularTypingDelay(texto) {
   return Math.min(base + texto.length * porChar, max) + jitter;
 }
 
-// Pausa aleatória entre mensagens (5 a 18 segundos — simula humano ocupado)
+// Pausa aleatória entre mensagens (30 a 90 segundos — simula humano ocupado)
 function pausaEntreMensagens() {
-  return 5000 + Math.floor(Math.random() * 13000);
+  return 30000 + Math.floor(Math.random() * 60000);
 }
 
 async function enviarMensagem(para, texto) {
