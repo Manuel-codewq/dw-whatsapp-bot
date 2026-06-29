@@ -115,15 +115,28 @@ function pausaEntreMensagens() {
   return 30000 + Math.floor(Math.random() * 60000);
 }
 
+async function mostrarTyping(para, duracaoMs) {
+  try {
+    await fetch(`${EVOLUTION_URL}/chat/sendPresence/${INSTANCE}`, {
+      method: "POST",
+      headers: { "apikey": EVOLUTION_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ number: para, presence: "composing", delay: duracaoMs }),
+    });
+    await delay(duracaoMs);
+  } catch (e) {
+    console.error("[Bot] Erro ao mostrar typing:", e.message);
+  }
+}
+
 async function enviarMensagem(para, texto) {
   filaEnvio = filaEnvio.then(async () => {
     try {
       const typingMs = calcularTypingDelay(texto);
+      await mostrarTyping(para, typingMs);
       await fetch(`${EVOLUTION_URL}/message/sendText/${INSTANCE}`, {
         method: "POST",
         headers: { "apikey": EVOLUTION_KEY, "Content-Type": "application/json" },
-        // delay activa o indicador "a escrever..." antes de enviar
-        body: JSON.stringify({ number: para, text: texto, delay: typingMs }),
+        body: JSON.stringify({ number: para, text: texto }),
       });
       console.log(`[Bot] Enviado para ${para} (typing ${typingMs}ms)`);
     } catch (e) {
